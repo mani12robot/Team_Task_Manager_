@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Task Manager</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ═══ NAVIGATION ═══════════════════════════════════════════ -->
+<nav class="navbar navbar-expand-lg" id="mainNav" style="display:none">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+      <div class="brand-icon"><i class="bi bi-kanban"></i></div>
+      <span>TaskFlow</span>
+    </a>
+    <div class="d-flex align-items-center gap-3 ms-auto">
+      <div class="nav-links d-none d-md-flex gap-1">
+        <a class="nav-link-btn active" href="#" data-page="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a class="nav-link-btn" href="#" data-page="projects"><i class="bi bi-folder2-open"></i> Projects</a>
+        <a class="nav-link-btn" href="#" data-page="tasks"><i class="bi bi-check2-square"></i> Tasks</a>
+      </div>
+      <div class="user-pill" id="userPill">
+        <div class="user-avatar" id="navAvatar"></div>
+        <span id="navUserName"></span>
+        <span class="role-badge" id="navRole"></span>
+      </div>
+      <button class="btn btn-sm btn-logout" onclick="logout()"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ AUTH PAGE ═════════════════════════════════════════════ -->
+<div id="authPage" class="auth-page">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-icon-lg"><i class="bi bi-kanban"></i></div>
+      <h1>TaskFlow</h1>
+      <p>Streamline your team's work. Assign, track, and deliver.</p>
+    </div>
+    <div class="auth-features">
+      <div class="feature-item"><i class="bi bi-shield-check"></i><span>Role-based access control</span></div>
+      <div class="feature-item"><i class="bi bi-graph-up"></i><span>Real-time progress tracking</span></div>
+      <div class="feature-item"><i class="bi bi-people"></i><span>Team collaboration tools</span></div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-card">
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginForm">
+        <h2 class="auth-title">Welcome back</h2>
+        <p class="auth-sub">Enter your credentials to continue</p>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" id="loginEmail" placeholder="you@example.com" />
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" />
+        </div>
+        <button class="btn btn-primary w-100" onclick="handleLogin()">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-loader d-none"><span class="spinner-border spinner-border-sm"></span></span>
+        </button>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="signupForm" style="display:none">
+        <h2 class="auth-title">Create account</h2>
+        <p class="auth-sub">Join your team on TaskFlow</p>
+        <div class="mb-3">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-control" id="signupName" placeholder="Alex Johnson" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" id="signupEmail" placeholder="you@example.com" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="signupPassword" placeholder="Min. 6 characters" />
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Role</label>
+          <select class="form-select" id="signupRole">
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button class="btn btn-primary w-100" onclick="handleSignup()">
+          <span class="btn-text">Create Account</span>
+          <span class="btn-loader d-none"><span class="spinner-border spinner-border-sm"></span></span>
+        </button>
+      </div>
+
+      <div id="authAlert" class="auth-alert d-none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP PAGES ════════════════════════════════════════════ -->
+<div id="appContent" style="display:none" class="app-content">
+
+  <!-- DASHBOARD PAGE -->
+  <div id="page-dashboard" class="page active">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-sub" id="dashGreeting">Overview of your tasks</p>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-total">
+          <div class="stat-icon"><i class="bi bi-list-task"></i></div>
+          <div class="stat-num" id="statTotal">—</div>
+          <div class="stat-label">Total Tasks</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-completed">
+          <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+          <div class="stat-num" id="statCompleted">—</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-pending">
+          <div class="stat-icon"><i class="bi bi-clock"></i></div>
+          <div class="stat-num" id="statPending">—</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-overdue">
+          <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+          <div class="stat-num" id="statOverdue">—</div>
+          <div class="stat-label">Overdue</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="content-card">
+      <div class="card-header-row">
+        <h3>Recent Tasks</h3>
+        <button class="btn btn-sm btn-outline-primary" onclick="navigateTo('tasks')">View All</button>
+      </div>
+      <div id="dashTasks"><div class="loading-state"><span class="spinner-border text-primary"></span></div></div>
+    </div>
+  </div>
+
+  <!-- PROJECTS PAGE -->
+  <div id="page-projects" class="page">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Projects</h1>
+        <p class="page-sub">Manage your team's projects</p>
+      </div>
+      <button class="btn btn-primary admin-only" onclick="openProjectModal()">
+        <i class="bi bi-plus-lg"></i> New Project
+      </button>
+    </div>
+    <div id="projectsList" class="row g-4">
+      <div class="col-12"><div class="loading-state"><span class="spinner-border text-primary"></span></div></div>
+    </div>
+  </div>
+
+  <!-- TASKS PAGE -->
+  <div id="page-tasks" class="page">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Tasks</h1>
+        <p class="page-sub">Track and manage tasks</p>
+      </div>
+      <button class="btn btn-primary admin-only" onclick="openTaskModal()">
+        <i class="bi bi-plus-lg"></i> New Task
+      </button>
+    </div>
+    <!-- Filters -->
+    <div class="filter-bar mb-4">
+      <select class="form-select form-select-sm" id="filterStatus" onchange="loadTasks()">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
+      <select class="form-select form-select-sm" id="filterProject" onchange="loadTasks()">
+        <option value="">All Projects</option>
+      </select>
+    </div>
+    <div id="tasksList">
+      <div class="loading-state"><span class="spinner-border text-primary"></span></div>
+    </div>
+  </div>
+
+</div><!-- /appContent -->
+
+<!-- ═══ MODALS ════════════════════════════════════════════════ -->
+
+<!-- Project Modal -->
+<div class="modal fade" id="projectModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="projectModalTitle">New Project</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="projectId" />
+        <div class="mb-3">
+          <label class="form-label">Project Name *</label>
+          <input type="text" class="form-control" id="projectName" placeholder="e.g. Website Redesign" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" id="projectDesc" rows="3" placeholder="What is this project about?"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Team Members</label>
+          <div id="memberCheckboxes" class="member-list"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div class="modal fade" id="taskModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="taskModalTitle">New Task</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="taskId" />
+        <div class="mb-3">
+          <label class="form-label">Task Title *</label>
+          <input type="text" class="form-control" id="taskTitle" placeholder="e.g. Design homepage mockup" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" id="taskDesc" rows="2" placeholder="Task details..."></textarea>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Project *</label>
+            <select class="form-select" id="taskProject" onchange="loadProjectMembers()"></select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Assign To *</label>
+            <select class="form-select" id="taskAssignee"></select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Priority</label>
+            <select class="form-select" id="taskPriority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Due Date *</label>
+            <input type="date" class="form-control" id="taskDueDate" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Status Modal (for members) -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Status</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="statusTaskId" />
+        <select class="form-select" id="statusSelect">
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="updateTaskStatus()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="appToast" class="toast align-items-center border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toastMsg"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
